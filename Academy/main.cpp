@@ -1,6 +1,11 @@
 ﻿#include<iostream>
 #include<string>
 using namespace std;
+using std::cout;
+using std::cin;
+using std::endl;
+
+#define delimiter "\n--------------------------------------\n"
 
 #define HUMAN_TAKE_PARAMETERS const std::string& last_name, const std::string& first_name, int age
 #define HUMAN_GIVE_PARAMETERS last_name, first_name, age
@@ -44,13 +49,13 @@ public:
 		set_age(age);
 		cout << "HConstructor:\t" << this << endl;
 	}
-	~Human()
+	virtual ~Human()
 	{
 		cout << "HDestructor:\t" << this << endl;
 	}
 
 	//				Methods:
-	void print()const
+	virtual void print()const
 	{
 		cout << last_name << " " << first_name << " " << age << endl;
 	}
@@ -58,7 +63,6 @@ public:
 
 #define STUDENT_TAKE_PARAMETERS const std::string& speciality, const std::string& group, double rating, double attendance
 #define STUDENT_GIVE_PARAMETERS speciality, group, rating, attendance
-
 class Student : public Human
 {
 	std::string speciality;
@@ -101,6 +105,14 @@ public:
 
 	//				Constructors:
 	Student(HUMAN_TAKE_PARAMETERS, STUDENT_TAKE_PARAMETERS):Human(HUMAN_GIVE_PARAMETERS)
+	{
+		set_speciality(speciality);
+		set_group(group);
+		set_rating(rating);
+		set_attendance(attendance);
+		cout << "SConstructor:\t" << this << endl;
+	}
+	Student(const Human& human, STUDENT_TAKE_PARAMETERS) :Human(human)
 	{
 		set_speciality(speciality);
 		set_group(group);
@@ -165,56 +177,31 @@ public:
 	}
 };
 
-#define GRADUATE_TAKE_PARAMETERS const std::string& faculty, const std::string& speciality, int year, int grade
-#define GRADUATE_GIVE_PARAMETERS faculty, speciality, year, grade
-
-class Graduate : public Human
+#define GRADUATE_TAKE_PARAMETERS const std::string& subject
+#define GRADUATE_GIVE_PARAMETERS subject
+class Graduate : public Student
 {
-	std::string faculty;
-	std::string speciality;
-	int year;
-	int grade;
+	std::string subject;
 public:
-	const std::string& get_faculty()const
+	const std::string& get_subject()const
 	{
-		return faculty;
+		return subject;
 	}
-	const std::string& get_speciality()const
+	void set_subject(const std::string& subject)
 	{
-		return speciality;
-	}
-	int get_year()const
-	{
-		return year;
-	}
-	int get_grade()const
-	{
-		return grade;
-	}
-	void set_faculty(const std::string& faculty)
-	{
-		this->faculty = faculty;
-	}
-	void set_speciality(const std::string& speciality)
-	{
-		this->speciality = speciality;
-	}
-	void set_year(int year)
-	{
-		this->year = year;
-	}
-	void set_grade(int grade)
-	{
-		this->grade = grade;
+		this->subject = subject;
 	}
 
 	//				Constructors:
-	Graduate(HUMAN_TAKE_PARAMETERS, GRADUATE_TAKE_PARAMETERS) :Human(HUMAN_GIVE_PARAMETERS)
+	Graduate(HUMAN_TAKE_PARAMETERS, STUDENT_TAKE_PARAMETERS, GRADUATE_TAKE_PARAMETERS):
+		Student(HUMAN_GIVE_PARAMETERS, STUDENT_GIVE_PARAMETERS)
 	{
-		set_faculty(faculty);
-		set_speciality(speciality);
-		set_year(year);
-		set_grade(grade);
+		this->subject = subject;
+		cout << "GConstructor:\t" << this << endl;
+	}
+	Graduate(const Student& student, const std::string& subject) :Student(student)
+	{
+		set_subject(subject);
 		cout << "GConstructor:\t" << this << endl;
 	}
 	~Graduate()
@@ -225,24 +212,67 @@ public:
 	//				Methods:
 	void print()const
 	{
-		Human::print();
-		cout << faculty << " " << speciality << " " << year << " " << grade << endl;
+		Student::print();
+		cout << subject << endl;
 	}
 };
+
+//#define INHERITANCE_1
+//#define INHERITANCE_2
 
 void main()
 {
 	setlocale(LC_ALL, "");
 	cout << "HelloAcademy" << endl;
+#ifdef INHERITANCE_1
 	Human human("Richter", "Jeffrey", 40);
 	human.print();
+	cout << delimiter << endl;
 
 	Student student("Pinkman", "Jessie", 20, "Chenistry", "WW_220", 95, 90);
 	student.print();
+	cout << delimiter << endl;
 
 	Teacher teacher("White", "Walter", 50, "Chemistry", 25);
 	teacher.print();
+	cout << delimiter << endl;
 
-	Graduate graduate("William", "Johns", 22, "Technical", "Robotics", 5, 95);
+	Graduate graduate("Schrader", "Hank", 40, "Criminlistic", "OBN", 50, 70, "How to catch Heisenberg");
 	graduate.print();
+	cout << delimiter << endl;
+#endif // INHERITANCE_1
+
+#ifdef INHERITANCE_2
+	Human human("Vercetty", "Tommy", 30);
+	human.print();
+	cout << delimiter << endl;
+
+	Student student(human, "Theft", "Vice", 95, 98);
+	student.print();
+	cout << delimiter << endl;
+
+	Graduate graduate(student, "How to make money");
+	graduate.print();
+	cout << delimiter << endl;
+#endif // INHERITANCE_2
+
+	Human* group[] =
+	{
+		new Student("Pinkman", "Jessie", 20, "Chenistry", "WW_220", 95, 90),
+		new Teacher("White", "Walter", 50, "Chemistry", 25),
+		new Graduate("Schrader", "Hank", 40, "Criminlistic", "OBN", 50, 70, "How to catch Heisenberg"),
+		new Student("Vercetty", "Tommy", 30, "Theft","Vice", 95, 98),
+		new Teacher("Diaz", "Ricardo", 50, "Weapons distribution", 20)
+	};
+
+	for(int i=0;i<sizeof(group)/ sizeof(group[0]);i++)
+	{
+		group[i]->print();
+		cout << delimiter << endl;
+	}
+
+	for (int i = 0; i < sizeof(group) / sizeof(group[0]); i++)
+	{
+		delete group[i];
+	}
 }
