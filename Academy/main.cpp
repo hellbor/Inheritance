@@ -165,24 +165,29 @@ public:
 	}
 };
 
-#define GRADUATE_TAKE_PARAMETERS const std::string& faculty, double year, double grade
-#define GRADUATE_GIVE_PARAMETERS faculty, year, grade
+#define GRADUATE_TAKE_PARAMETERS const std::string& faculty, const std::string& speciality, int year, int grade
+#define GRADUATE_GIVE_PARAMETERS faculty, speciality, year, grade
 
-class Graduate : public Student
+class Graduate : public Human
 {
 	std::string faculty;
-	double year;
-	double grade;
+	std::string speciality;
+	int year;
+	int grade;
 public:
 	const std::string& get_faculty()const
 	{
 		return faculty;
 	}
-	double get_year()const
+	const std::string& get_speciality()const
+	{
+		return speciality;
+	}
+	int get_year()const
 	{
 		return year;
 	}
-	double get_grade()const
+	int get_grade()const
 	{
 		return grade;
 	}
@@ -190,19 +195,24 @@ public:
 	{
 		this->faculty = faculty;
 	}
-	void set_year(double year)
+	void set_speciality(const std::string& speciality)
+	{
+		this->speciality = speciality;
+	}
+	void set_year(int year)
 	{
 		this->year = year;
 	}
-	void set_grade(double grade)
+	void set_grade(int grade)
 	{
 		this->grade = grade;
 	}
 
 	//				Constructors:
-	Graduate(HUMAN_TAKE_PARAMETERS, STUDENT_TAKE_PARAMETERS, GRADUATE_TAKE_PARAMETERS) :Student(HUMAN_GIVE_PARAMETERS, STUDENT_GIVE_PARAMETERS)
+	Graduate(HUMAN_TAKE_PARAMETERS, GRADUATE_TAKE_PARAMETERS) :Human(HUMAN_GIVE_PARAMETERS)
 	{
 		set_faculty(faculty);
+		set_speciality(speciality);
 		set_year(year);
 		set_grade(grade);
 		cout << "GConstructor:\t" << this << endl;
@@ -215,8 +225,8 @@ public:
 	//				Methods:
 	void print()const
 	{
-		Student::print();
-		cout << faculty << " " << year << " " << grade << endl;
+		Human::print();
+		cout << faculty << " " << speciality << " " << year << " " << grade << endl;
 	}
 };
 
@@ -233,6 +243,6 @@ void main()
 	Teacher teacher("White", "Walter", 50, "Chemistry", 25);
 	teacher.print();
 
-	Graduate graduate("William", "Johns", 22, "Technical", 5, 95);
+	Graduate graduate("William", "Johns", 22, "Technical", "Robotics", 5, 95);
 	graduate.print();
 }
