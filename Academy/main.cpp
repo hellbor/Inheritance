@@ -217,6 +217,12 @@ public:
 	}
 };
 
+std::ostream& operator<<(std::ostream& os, const Human& obj)
+{
+	obj.print();
+	return os;
+}
+
 //#define INHERITANCE_1
 //#define INHERITANCE_2
 
@@ -267,7 +273,8 @@ void main()
 
 	for(int i=0;i<sizeof(group)/ sizeof(group[0]);i++)
 	{
-		group[i]->print();
+		//group[i]->print();
+		cout << *group[i] << endl;
 		cout << delimiter << endl;
 	}
 
