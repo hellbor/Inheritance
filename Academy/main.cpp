@@ -55,9 +55,9 @@ public:
 	}
 
 	//				Methods:
-	virtual void print()const
+	virtual std::ostream& print(std::ostream& os)const
 	{
-		cout << last_name << " " << first_name << " " << age << endl;
+		return os << " " << last_name << " " << first_name << " " << age;
 	}
 };
 
@@ -126,10 +126,9 @@ public:
 	}
 
 	//				Methods:
-	void print()const
+	std::ostream& print(std::ostream& os)const override
 	{
-		Human::print();
-		cout << speciality << " " << group << " " << rating << " " << attendance << endl;
+		return Human::print(os) << " " << speciality << " " << group << " " << rating << " " << attendance;
 	}
 };
 
@@ -170,10 +169,9 @@ public:
 	}
 
 	//				Methods:
-	void print()const
+	std::ostream& print(std::ostream& os)const override
 	{
-		Human::print();
-		cout << speciality << " " << experience << " years" << endl;
+		return Human::print(os) << " " << speciality << " " << experience << " years";
 	}
 };
 
@@ -210,17 +208,32 @@ public:
 	}
 
 	//				Methods:
-	void print()const
+	std::ostream& print(std:: ostream& os)const override
 	{
-		Student::print();
-		cout << subject << endl;
+		return Student::print(os) << subject;
 	}
 };
 
 std::ostream& operator<<(std::ostream& os, const Human& obj)
 {
-	obj.print();
-	return os;
+	return obj.print(os);
+}
+void Print(Human* group[], const int n)
+{
+	cout << delimiter << endl;
+	for (int i = 0; i < n; i++)
+	{
+		//group[i]->print();
+		cout << *group[i] << endl;
+		cout << delimiter << endl;
+	}
+}
+void Clear(Human* group[], const int n)
+{
+	for (int i = 0; i < n; i++)
+	{
+		delete group[i];
+	}
 }
 
 //#define INHERITANCE_1
@@ -266,20 +279,10 @@ void main()
 	{
 		new Student("Pinkman", "Jessie", 20, "Chenistry", "WW_220", 95, 90),
 		new Teacher("White", "Walter", 50, "Chemistry", 25),
-		new Graduate("Schrader", "Hank", 40, "Criminlistic", "OBN", 50, 70, "How to catch Heisenberg"),
-		new Student("Vercetty", "Tommy", 30, "Theft","Vice", 95, 98),
+		new Graduate("Schrader", "Hank", 40, "Criminlistic", "OBN", 70, 75, "How to catch Heisenberg"),
+		new Student("Vercetty", "Tommy", 30, "Theft","Vice", 97, 98),
 		new Teacher("Diaz", "Ricardo", 50, "Weapons distribution", 20)
 	};
-
-	for(int i=0;i<sizeof(group)/ sizeof(group[0]);i++)
-	{
-		//group[i]->print();
-		cout << *group[i] << endl;
-		cout << delimiter << endl;
-	}
-
-	for (int i = 0; i < sizeof(group) / sizeof(group[0]); i++)
-	{
-		delete group[i];
-	}
+	Print(group, sizeof(group) / sizeof(group[0]));
+	Clear(group, sizeof(group) / sizeof(group[0]));
 }
