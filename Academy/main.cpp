@@ -72,7 +72,7 @@ public:
 						//При первом вызове метод width() включает выравнивание по правому краю
 		ofs << std::left;	//Возвращаем выравнивание по левому краю.
 						//Один вызов width() влияет на одно вводимое значение
-		ofs << std::string(strchr(typeid(*this).name(), ' ') + 1) << ":";
+		ofs << std::string(strchr(typeid(*this).name(), ' ') + 1) + ":";
 		ofs.width(LAST_NAME_WIDTH);
 		ofs << last_name;
 		ofs.width(FIRST_NAME_WIDTH);
@@ -80,6 +80,11 @@ public:
 		ofs.width(AGE_WIDTH);
 		ofs << age;
 		return ofs;
+	}
+	std::ifstream& read(std::ifstream& ifs)
+	{
+		ifs >> last_name >> first_name >> age;
+		return ifs;
 	}
 };
 
@@ -91,15 +96,20 @@ std::ofstream& operator<<(std::ofstream& ofs, const Human& obj)
 {
 	return obj.print(ofs);
 }
+std::ifstream& operator>>(std::ifstream& ifs, Human& obj)
+{
+	return obj.read(ifs);
+}
+
 
 #define STUDENT_TAKE_PARAMETERS const std::string& speciality, const std::string& group, double rating, double attendance
 #define STUDENT_GIVE_PARAMETERS speciality, group, rating, attendance
 class Student : public Human
 {
-	const static int SPECIALITY_WIDTH = 25;
-	const static int GROUP_WIDTH = 8;
-	const static int RATING_WIDTH = 8;
-	const static int ATTENDANCE_WIDTH = 8;
+	static const int SPECIALITY_WIDTH = 25;
+	static const int GROUP_WIDTH = 8;
+	static const int RATING_WIDTH = 8;
+	static const int ATTENDANCE_WIDTH = 8;
 	std::string speciality;
 	std::string group;
 	double rating;
@@ -178,14 +188,20 @@ public:
 		ofs << attendance;
 		return ofs;
 	}
+	std::ifstream& read(std::ifstream& ifs)
+	{
+		Human::read(ifs);
+		ifs >> speciality >> group >> rating >> attendance;
+		return ifs;
+	}
 };
 
 #define TEACHER_TAKE_PARAMETERS const std::string& speciality,int experience
 #define TEACHER_GIVE_PARAMETERS speciality, experience
 class Teacher :public Human
 {
-	const static int SPECIALITY_WIDTH = 25;
-	const static int EXPERIENCE_WIDTH = 5;
+	static const int SPECIALITY_WIDTH = 25;
+	static const int EXPERIENCE_WIDTH = 5;
 	std::string speciality;
 	int experience;
 public:
@@ -231,6 +247,16 @@ public:
 		ofs.width(EXPERIENCE_WIDTH);
 		ofs << experience;
 		return ofs;
+	}
+	std::ifstream& read(std::ifstream& ifs)
+	{
+		Human::read(ifs);
+		char sz_speciality[SPECIALITY_WIDTH + 1]{};
+		ifs.read(sz_speciality, SPECIALITY_WIDTH);
+		for (int i = SPECIALITY_WIDTH - 2; sz_speciality[i] == ' '; i--)sz_speciality[i] = 0;
+		speciality = sz_speciality;
+		ifs >> experience;
+		return ifs;
 	}
 };
 
@@ -279,6 +305,12 @@ public:
 		ofs << subject;
 		return ofs;
 	}
+	std::ifstream& read(std::ifstream& ifs)
+	{
+		Student::read(ifs);
+		std::getline(ifs, subject);
+		return ifs;
+	}
 };
 
 void Print(Human* group[], const int n)
@@ -287,9 +319,13 @@ void Print(Human* group[], const int n)
 	for (int i = 0; i < n; i++)
 	{
 		//group[i]->print();
-		cout << *group[i] << endl;
-		cout << delimiter << endl;
+		if (group[i])
+		{
+			cout << *group[i] << endl;
+			cout << delimiter << endl;
+		}
 	}
+	cout << "Количество человек в группе: " << n << endl;
 }
 void Save(Human* group[], const int n, const std::string& filename)
 {
@@ -303,40 +339,62 @@ void Save(Human* group[], const int n, const std::string& filename)
 	system(cmd.c_str()); //Функция system(const char*) выполняет любую доступную команду ОС
 						//Мнетод c_str() возвращает C-string (NULL Terminated Line), обвернутый в объект класса std::string. 
 }
+Human* HumanFactory(const std::string& type)
+{
+	Human* human = nullptr;
+	if (type == "Human")human = new Human("", "", 0);
+	if (type == "Teacher")human = new Teacher("", "", 0,"",0);
+	if (type == "Studant")human = new Student("", "", 0,"","",0,0);
+	if (type == "Graduate")human = new Graduate("", "", 0,"","",0,0,"");
+	return human;
+}
+bool NotAppropriateType(const std::string& buffer)
+{
+	//Несоответствующий тип
+	return buffer.find("Human:") == std::string::npos &&
+		buffer.find("Student:") == std::string::npos &&
+		buffer.find("Teacher:") == std::string::npos &&
+		buffer.find("Graduate:") == std::string::npos;
+}
 Human** Load(const std::string& filename, int& n)
 {
 	Human** group = nullptr;
 	std::ifstream fin(filename);
 	if (fin.is_open())
 	{
+		//1) Вычисляем размер файла (количество записей в файле);
 		n = 0;
 		while (!fin.eof())
 		{
 			std::string buffer;
-			//fin.getline();
-			std::getline(fin, buffer);
+			//fin.getline();	//НЕ перегружен для объектов класса std::string
+			std::getline(fin, buffer);	//читает все до конца строки
 			//move DST, SRC;
 			//strcat(DST, SRC);
-			if (
-				buffer.find("Human:") == std::string::npos &&
-				buffer.find("Student:") == std::string::npos &&
-				buffer.find("Teacher:") == std::string::npos &&
-				buffer.find("Graduate:") == std::string::npos
-				)continue;
+			if (NotAppropriateType(buffer))continue;
 			n++;
 		}
-		cout << "Количество записей в файле: " << n << endl;
+		cout << "Количество записей в файле:" << n << endl;
 
+		//2) Выделяем память для группы:
 		group = new Human*[n] {};
 
+		//3)Возвращаемся в начало файла, для того чтобы прочитать содержимое этого файла:
 		cout << "Позиция курсора на чтение:" << fin.tellg() << endl;
 		fin.clear();
 		fin.seekg(0);
 		cout << "Позиция курсора на чтение:" << fin.tellg() << endl;
+
+		//4) Читаем файл:
 		for (int i = 0; !fin.eof(); i++)
 		{
 			std::string type;
 			fin >> type;
+			if (NotAppropriateType(type))continue;
+			group[i] = HumanFactory(type);
+			if (group[i])
+				fin >> *group[i];
+
 		}
 		fin.close();
 	}
@@ -412,6 +470,8 @@ void main()
 #ifdef LOAD_CHECK
 	int n = 0;
 	Human** group = Load("group.txt", n);
+	Print(group, n);
+	Clear(group, n);
 #endif // LOAD_CHECK
 
 }
