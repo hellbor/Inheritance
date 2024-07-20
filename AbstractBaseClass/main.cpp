@@ -3,6 +3,7 @@ using namespace std;
 
 class Vehicle
 {
+	int speed;
 public:
 	virtual void move() = 0;
 };
@@ -36,13 +37,13 @@ class AirPlane:public AirVehicle
 public:
 	void move()override
 	{
+		take_off();
 		cout << "Полет нормальный" << endl;
+		land();
 	}
 	void take_off()override
 	{
-		take_off();
 		cout << "Нужна взлетная полеса" << endl;
-		land();
 	}
 	void land()override
 	{
@@ -54,7 +55,9 @@ class Helicopter:public AirVehicle
 public:
 	void move()override
 	{
+		take_off();
 		cout << "Летим по-тихоньку" << endl;
+		land();
 	}
 	void take_off()override
 	{
