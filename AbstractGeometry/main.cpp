@@ -150,6 +150,92 @@ namespace Geometry
 			Shape::info();
 		}
 	};
+
+	class Triangle :public Shape
+	{
+		double lenght;
+		double width;
+		double height;
+	public:
+		Triangle(double lenght, double widht, double height, Color color) :Shape(color)
+		{
+			set_lenght(lenght);
+			set_widht(widht);
+			set_height(height);
+		}
+		~Triangle() {}
+		void set_lenght(double lenght)
+		{
+			this->lenght = lenght;
+		}
+		void set_widht(double widht)
+		{
+			this->width = widht;
+		}
+		void set_height(double height)
+		{
+			this->height = height;
+		}
+		double get_lenght()const
+		{
+			return lenght;
+		}
+		double get_widht()const
+		{
+			return width;
+		}
+		double get_height()const
+		{
+			return height;
+		}
+		double get_area()const
+		{
+			return (width * height) / 2;
+		}
+		double get_perimeter()const
+		{
+			return lenght + width + height;
+		}
+		void draw()const override
+		{
+			HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+			//HWND hwnd = FindWindow(NULL, L"Inheritance - Microsoft Visual Studio");
+			HWND hwnd = GetConsoleWindow();
+			HDC hdc = GetDC(hwnd);
+			HPEN hPen = CreatePen(PS_SOLID, 3, color);
+			HBRUSH hBrush = CreateSolidBrush(color);
+			SelectObject(hdc, hPen);
+			SelectObject(hdc, hBrush);
+
+			//::Triangle(hdc, 10, 30, 70);
+
+			DeleteObject(hBrush);
+			DeleteObject(hPen);
+
+			ReleaseDC(hwnd, hdc);
+
+			for (int i = 0; i < lenght; i++)
+			{
+				for (int j = 0; j <= i; j++)
+				{
+					SetConsoleTextAttribute(hConsole, color);
+					cout << "*  ";
+					SetConsoleTextAttribute(hConsole, Color::CONSOLE_DEFAULT);
+				}
+				//for (int j = i; j <= lenght; j++)cout << " ";
+				cout << endl;
+			}
+		}
+		void info()const override
+
+		{
+			cout << typeid(*this).name() << endl;
+			cout << "Длина треугольника: " << get_lenght() << endl;
+			cout << "Ширина треугольника: " << get_widht() << endl;
+			cout << "Высота треугольника: " << get_height() << endl;
+			Shape::info();
+		}
+	};
 }
 
 void main()
@@ -157,13 +243,16 @@ void main()
 	setlocale(LC_ALL, "");
 	//Shape shape(Color::CONSOLE_RED);
 	Geometry::Square square(5, Geometry::Color::CONSOLE_RED);
-	/*cout << "Длина стороны: " << square.get_side() << endl;
+	cout << "Длина стороны: " << square.get_side() << endl;
 	cout << "Площадь квадрата: " << square.get_area() << endl;
 	cout << "Периметр квадрата: " << square.get_perimeter() << endl;
-	square.draw();*/
+	square.draw();
 
 	square.info();
 
 	Geometry::Rectangle rect(100, 50, Geometry::Color::CONSOLE_BLUE);
 	rect.info();
+
+	Geometry::Triangle triangle(10, 30, 70, Geometry::Color::CONSOLE_GREEN);
+	triangle.info();
 }
