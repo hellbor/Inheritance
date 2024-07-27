@@ -11,6 +11,7 @@ namespace Geometry
 		GREEN	= 0x0000FF00,
 		BLUE	= 0x00FF0000,
 		YELLOW	= 0x0000FFFF,
+		DARK_GREEN	= 0x0000AA00,
 		CONSOLE_RED = 0xCC, //старшая 'С' - цвет фона, младшая 'C' - цвет текста
 		CONSOLE_GREEN = 0xAA,
 		CONSOLE_BLUE = 0x99,
@@ -230,48 +231,48 @@ namespace Geometry
 
 	//class Triangle :public Shape
 	//{
-	//	double lenght;
+	//	double length;
 	//	double width;
-	//	double height;
+	//	double heigth;
 	//public:
-	//	Triangle(double lenght, double widht, double height, Color color) :Shape(color)
+	//	Triangle(double length, double width, double heigth, Color color) :Shape(color)
 	//	{
-	//		set_lenght(lenght);
-	//		set_widht(widht);
-	//		set_height(height);
+	//		set_lenght(length);
+	//		set_width(width);
+	//		set_heigth(heigth);
 	//	}
 	//	~Triangle() {}
-	//	void set_lenght(double lenght)
+	//	void set_length(double length)
 	//	{
 	//		this->lenght = lenght;
 	//	}
-	//	void set_widht(double widht)
+	//	void set_width(double width)
 	//	{
 	//		this->width = widht;
 	//	}
-	//	void set_height(double height)
+	//	void set_heigth(double heigth)
 	//	{
-	//		this->height = height;
+	//		this->heigth = heigth;
 	//	}
-	//	double get_lenght()const
+	//	double get_length()const
 	//	{
-	//		return lenght;
+	//		return length;
 	//	}
-	//	double get_widht()const
+	//	double get_width()const
 	//	{
 	//		return width;
 	//	}
-	//	double get_height()const
+	//	double get_heigth()const
 	//	{
-	//		return height;
+	//		return heigth;
 	//	}
 	//	double get_area()const
 	//	{
-	//		return (width * height) / 2;
+	//		return (width * heigth) / 2;
 	//	}
 	//	double get_perimeter()const
 	//	{
-	//		return lenght + width + height;
+	//		return length + width + heigth;
 	//	}
 	//	void draw()const override
 	//	{
@@ -291,7 +292,7 @@ namespace Geometry
 
 	//		ReleaseDC(hwnd, hdc);
 
-	//		for (int i = 0; i < lenght; i++)
+	//		for (int i = 0; i < length; i++)
 	//		{
 	//			for (int j = 0; j <= i; j++)
 	//			{
@@ -299,7 +300,7 @@ namespace Geometry
 	//				cout << "*  ";
 	//				SetConsoleTextAttribute(hConsole, Color::CONSOLE_DEFAULT);
 	//			}
-	//			//for (int j = i; j <= lenght; j++)cout << " ";
+	//			//for (int j = i; j <= length; j++)cout << " ";
 	//			cout << endl;
 	//		}
 	//	}
@@ -307,9 +308,9 @@ namespace Geometry
 
 	//	{
 	//		cout << typeid(*this).name() << endl;
-	//		cout << "Длина треугольника: " << get_lenght() << endl;
-	//		cout << "Ширина треугольника: " << get_widht() << endl;
-	//		cout << "Высота треугольника: " << get_height() << endl;
+	//		cout << "Длина треугольника: " << get_length() << endl;
+	//		cout << "Ширина треугольника: " << get_width() << endl;
+	//		cout << "Высота треугольника: " << get_heigth() << endl;
 	//		Shape::info();
 	//	}
 	//};
@@ -375,27 +376,180 @@ namespace Geometry
 			Shape::info();
 		}
 	};
+	class Triangle :public Shape
+	{
+	public:
+		Triangle(SHAPE_TAKE_PARAMETERS) :Shape(SHAPE_GIVE_PARAMETERS){}
+		~Triangle() {}
+		virtual double get_height()const = 0;
+		void info()const override
+		{
+			cout << "Высота треугольника: " << get_height() << endl;
+			Shape::info();
+		}
+	};
+	class EquilateralTriangle :public Triangle
+	{
+		double side;
+	public:
+		EquilateralTriangle(double side, SHAPE_TAKE_PARAMETERS) :Triangle(SHAPE_GIVE_PARAMETERS)
+		{
+			set_side(side);
+		}
+		~EquilateralTriangle(){}
+		void set_side(double side)
+		{
+			this->side = filter_size(side);
+		}
+		double get_side()const
+		{
+			return side;
+		}
+		double get_height()const override
+		{
+			return sqrt(pow(side, 2) - pow(side / 2, 2));
+		}
+		double get_area()const override
+		{
+			return side * get_height() / 2;
+		}
+		double get_perimeter()const override
+		{
+			return 3 * side;
+		}
+		void draw()const override
+		{
+			HWND hwnd = FindWindow(NULL, L"Inheritance - Microsoft Visual Studio");
+			HDC hdc = GetDC(hwnd);
+
+			HPEN hPen = CreatePen(PS_SOLID, line_width, color);
+			HBRUSH hBrush = CreateSolidBrush(color);
+
+			SelectObject(hdc, hPen);
+			SelectObject(hdc, hBrush);
+
+			POINT vertices[] =
+			{
+				{start_x, start_y + side},
+				{start_x + side, start_y + side},
+				{start_x + side / 2, start_y + side - get_height()}
+			};
+
+			::Polygon(hdc, vertices, 3);
+
+			DeleteObject(hBrush);
+			DeleteObject(hPen);
+
+			ReleaseDC(hwnd, hdc);
+		}
+		void info()const override
+		{
+			cout << typeid(*this).name() << endl;
+			cout << "Длина стороны :" << get_side() << endl;
+			Triangle::info();
+		}
+	};
+	class IsoscelesTriangle :public Triangle
+	{
+		double base;
+		double side;
+	public:
+		IsoscelesTriangle(double base, double side, SHAPE_TAKE_PARAMETERS) :Triangle(SHAPE_GIVE_PARAMETERS)
+		{
+			set_base(base);
+			set_side(side);
+		}
+		~IsoscelesTriangle(){}
+		void set_base(double base)
+		{
+			this->base = filter_size(base);
+		}
+		void set_side(double side)
+		{
+			this->side = filter_size(side);
+			if (this->side <= base / 2)
+				this->side = base * 3 / 5;
+		}
+		double get_base()const
+		{
+			return base;
+		}
+		double get_side()const
+		{
+			return side;
+		}
+		double get_height()const override
+		{
+			return sqrt(pow(side, 2) - pow(base / 2, 2));
+		}
+		double get_area()const override
+		{
+			return base * get_height() / 2;
+		}
+		double get_perimeter()const override
+		{
+			return base + side * 2;
+		}
+		void draw()const override
+		{
+			HWND hwnd = FindWindow(NULL, L"Inheritance - Microsoft Visual Studio");
+			HDC hdc = GetDC(hwnd);
+
+			HPEN hPen = CreatePen(PS_SOLID, line_width, color);
+			HBRUSH hBrush = CreateSolidBrush(color);
+
+			SelectObject(hdc, hPen);
+			SelectObject(hdc, hBrush);
+
+			POINT vertices[] =
+			{
+				{start_x,start_y + side},
+				{start_x + base,start_y + side},
+				{start_x + base / 2,start_y + side - get_height()},
+			};
+
+			::Polygon(hdc, vertices, 3);
+
+			DeleteObject(hBrush);
+			DeleteObject(hPen);
+
+			ReleaseDC(hwnd, hdc);
+		}
+		void info()const override
+		{
+			cout << typeid(*this).name() << endl;
+			cout << "Основание треугольника: " << get_base() << endl;
+			cout << "Сторона треугольника: " << get_side() << endl;
+			Triangle::info();
+		}
+	};
 }
 
 void main()
 {
 	setlocale(LC_ALL, "");
 	//Shape shape(Color::CONSOLE_RED);
-	Geometry::Square square(5, 100, 100, 5, Geometry::Color::RED);
+	Geometry::Square square(50, 100, 100, 5, Geometry::Color::RED);
 	/*cout << "Длина стороны: " << square.get_side() << endl;
 	cout << "Площадь квадрата: " << square.get_area() << endl;
 	cout << "Периметр квадрата: " << square.get_perimeter() << endl;*/
 	square.draw();
 	square.info();
 
-	Geometry::Rectangle rect(500, 300, 200, 100, 10, Geometry::Color::BLUE);
+	Geometry::Rectangle rect(150, 130, 300, 120, 1, Geometry::Color::BLUE);
 	rect.info();
 
 	//Geometry::Triangle triangle(10, 30, 70, Geometry::Color::CONSOLE_GREEN);
 	//triangle.info();
 
-	Geometry::Circle disk(10, 500,100, 5, Geometry::Color::YELLOW);
+	Geometry::EquilateralTriangle e_triangle(150, 300, 100, 5, Geometry::Color::DARK_GREEN);
+	e_triangle.info();
+
+	Geometry::Circle disk(10000, 500,100, 5, Geometry::Color::YELLOW);
 	disk.info();
+
+	Geometry::IsoscelesTriangle iso_triangle(200, 10, 500, 200, 5, Geometry::Color::DARK_GREEN);
+	iso_triangle.info();
 
 	cout << "Количество фигур: " << disk.get_count() << endl;
 }
