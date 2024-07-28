@@ -7,7 +7,7 @@ namespace Geometry
 {
 	enum Color
 	{
-		RED			= 0x000000FF,
+		RED		= 0x000000FF,
 		GREEN		= 0x0000FF00,
 		BLUE		= 0x00FF0000,
 		YELLOW		= 0x0000FFFF,
