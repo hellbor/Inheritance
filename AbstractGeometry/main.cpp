@@ -7,12 +7,12 @@ namespace Geometry
 {
 	enum Color
 	{
-		RED				= 0x000000FF,
-		GREEN			= 0x0000FF00,
-		BLUE			= 0x00FF0000,
-		YELLOW			= 0x0000FFFF,
-		DARK_GREEN		= 0x0000AA00,
-		CONSOLE_RED		= 0xCC,			//старшая 'С' - цвет фона, младшая 'C' - цвет текста
+		RED		= 0x000000FF,
+		GREEN		= 0x0000FF00,
+		BLUE		= 0x00FF0000,
+		YELLOW		= 0x0000FFFF,
+		DARK_GREEN	= 0x0000AA00,
+		CONSOLE_RED	= 0xCC,			//старшая 'С' - цвет фона, младшая 'C' - цвет текста
 		CONSOLE_GREEN	= 0xAA,
 		CONSOLE_BLUE	= 0x99,
 		CONSOLE_DEFAULT = 0x07
