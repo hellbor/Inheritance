@@ -523,6 +523,82 @@ namespace Geometry
 			Triangle::info();
 		}
 	};
+	class RightTriangle :public Triangle
+	{
+		double catheter_1;
+		double catheter_2;
+	public:
+		RightTriangle(double catheter_1, double catheter_2, SHAPE_TAKE_PARAMETERS) :Triangle(SHAPE_GIVE_PARAMETERS)
+		{
+			set_catheter_1(catheter_1);
+			set_catheter_2(catheter_2);
+		}
+		void set_catheter_1(double catheter_1)
+		{
+			this->catheter_1 = filter_size(catheter_1);
+		}
+		void set_catheter_2(double catheter_2)
+		{
+			this->catheter_2 = filter_size(catheter_2);
+		}
+		double get_catheter_1()const
+		{
+			return catheter_1;
+		}
+		double get_catheter_2()const
+		{
+			return catheter_2;
+		}
+		double get_hypotenuse()const
+		{
+			return sqrt(pow(catheter_1,2)+pow(catheter_2,2));
+		}
+		double get_height()const override
+		{
+			return catheter_2;
+		}
+		double get_area()const override
+		{
+			return catheter_1 * catheter_2 / 2;
+		}
+		double get_perimeter()const override
+		{
+			return catheter_1 + catheter_2 + get_hypotenuse();
+		}
+		void draw()const override
+		{
+			HWND hwnd = FindWindow(NULL, L"Inheritance - Microsoft Visual Studio");
+			HDC hdc = GetDC(hwnd);
+
+			HPEN hPen = CreatePen(PS_SOLID, line_width, color);
+			HBRUSH hBrush = CreateSolidBrush(color);
+
+			SelectObject(hdc, hPen);
+			SelectObject(hdc, hBrush);
+
+			POINT vertices[] =
+			{
+				{start_x, start_y},
+				{start_x, start_y + get_height()},
+				{start_x + catheter_1, start_y + get_height()},
+			};
+				
+			::Polygon(hdc, vertices, 3);
+
+			DeleteObject(hBrush);
+			DeleteObject(hPen);
+
+			ReleaseDC(hwnd, hdc);
+		}
+			void info()const override
+			{
+				cout << typeid(*this).name() << endl;
+				cout << "Катет треугольника 1: " << get_catheter_1() << endl;
+				cout << "Катет треугольника 2: " << get_catheter_2() << endl;
+				cout << "Гипотенуза треугольника : " << get_hypotenuse() << endl;
+				Triangle::info();
+			}
+	};
 }
 
 void main()
@@ -550,6 +626,9 @@ void main()
 
 	Geometry::IsoscelesTriangle iso_triangle(200, 10, 500, 200, 5, Geometry::Color::DARK_GREEN);
 	iso_triangle.info();
+
+	Geometry::RightTriangle r_triangle(200, 100, 400, 300, 5, Geometry::Color::DARK_GREEN);
+	r_triangle.info();
 
 	cout << "Количество фигур: " << disk.get_count() << endl;
 }
