@@ -36,11 +36,35 @@ namespace Geometry
 		static const int MIN_SIZE = 50;
 		static const int MAX_SIZE = 500;
 		static int count;
+
+		void shape_draw()const
+		{
+			HWND hwnd = FindWindow(NULL, L"Inheritance - Microsoft Visual Studio");
+			HDC hdc = GetDC(hwnd);
+
+			HPEN hPen = CreatePen(PS_SOLID, line_width, color);
+			HBRUSH hBrush = CreateSolidBrush(color);
+
+			SelectObject(hdc, hPen);
+			SelectObject(hdc, hBrush);
+
+			draw_shape(hdc);
+
+			DeleteObject(hBrush);
+			DeleteObject(hPen);
+
+			ReleaseDC(hwnd, hdc);
+		}
+		virtual void draw_shape(HDC hdc)const = 0;
+
 	public:
 		//Чисто виртуальные функции (Pure virtual functions)
 		virtual double get_area()const = 0;
 		virtual double get_perimeter()const = 0;
-		virtual void draw()const = 0;
+		virtual void draw()const
+		{
+			shape_draw();
+		}
 		/////////////////////////////////////////////
 		Shape(SHAPE_TAKE_PARAMETERS) :color(color)
 		{
@@ -157,18 +181,18 @@ namespace Geometry
 
 	class Rectangle :public Shape
 	{
-		double width;	//ширина прямоугольника
+		double widht;	//ширина прямоугольника
 		double height;	//высота прямоугольника
 	public:
-		Rectangle(double width, double height, SHAPE_TAKE_PARAMETERS) :Shape(SHAPE_GIVE_PARAMETERS)
+		Rectangle(double widht, double height, SHAPE_TAKE_PARAMETERS) :Shape(SHAPE_GIVE_PARAMETERS)
 		{
-			set_width(width);
+			set_widht(widht);
 			set_height(height);
 		}
 		~Rectangle() {}
-		void set_width(double width)
+		void set_widht(double widht)
 		{
-			this->width = filter_size(width);
+			this->widht = filter_size(widht);
 		}
 		void set_height(double height)
 		{
@@ -176,7 +200,7 @@ namespace Geometry
 		}
 		double get_width()const
 		{
-			return width;
+			return widht;
 		}
 		double get_height()const
 		{
@@ -184,41 +208,15 @@ namespace Geometry
 		}
 		double get_area()const
 		{
-			return width * height;
+			return widht * height;
 		}
 		double get_perimeter()const
 		{
-			return (width + height) * 2;
+			return (widht + height) * 2;
 		}
-		void draw()const override
+		void draw_shape(HDC hdc)const override
 		{
-			//WinGDI - Windows Graphics Device Interface
-			//1) Получаем окно консоли:
-			//HWND hwnd = GetConsoleWindow();	//Эта функция получает окно консоли
-			HWND hwnd = FindWindow(NULL, L"Inheritance - Microsoft Visual Studio");
-			//2)Для того, чтобы рисовать, нужен контекст устройства (Device Context)б
-			// который есть у каждого окна. Контекст устройства можно получить при помощи функции GetDC()
-			HDC hdc = GetDC(hwnd);	//Получаем контекст окна консоли
-			//Контекст устройства - это то, на чем мы будем рисовать.
-
-			//3) Теперь нам нужно то, чем мы будем рисовать:
-			HPEN hPen = CreatePen(PS_SOLID, 5, color);	//hPen - рисует контур фигуры
-			//SP_SOLID - сплошная линия
-			//5 - толщина линии
-			HBRUSH hBrush = CreateSolidBrush(color);	//hBrush - рисует заливку фигуры, SolidBrush - сплошной цвет
-
-			//4) Выбираем чем, и на чем мы будем рисовать:
-			SelectObject(hdc, hPen);
-			SelectObject(hdc, hBrush);
-
-			//5) рисуем фигуру:
-			::Rectangle(hdc, start_x, start_y, start_x + width, start_y + height);	//:: - Global Scope (Глобальное пространство имен)
-
-			//6)hdBrush занимают ресурсы, и после того, как мы ими воспользовались, ресурсы нужно освободить
-			DeleteObject(hBrush);
-			DeleteObject(hPen);
-
-			ReleaseDC(hwnd, hdc);
+			::Rectangle(hdc, start_x, start_y, start_x + widht, start_y + height);
 		}
 		void info()const override
 		{
@@ -349,24 +347,9 @@ namespace Geometry
 		{
 			return M_PI * get_diameter();
 		}
-		void draw()const override
+		void draw_shape(HDC hdc)const override
 		{
-			HWND hwnd = FindWindow(NULL, L"Inheritance - Microsoft Visual Studio");
-			HDC hdc = GetDC(hwnd);
-
-			HPEN hPen = CreatePen(PS_SOLID, 5, color);
-			HBRUSH hBrush = CreateSolidBrush(color);
-
-			SelectObject(hdc, hPen);
-			SelectObject(hdc, hBrush);
-
 			::Ellipse(hdc, start_x, start_y, start_x + get_diameter(), start_y + get_diameter());
-
-			// Очищаем ресурсы:
-			DeleteObject(hBrush);
-			DeleteObject(hPen);
-
-			ReleaseDC(hwnd, hdc);
 		}
 		void info()const override
 		{
@@ -417,17 +400,8 @@ namespace Geometry
 		{
 			return 3 * side;
 		}
-		void draw()const override
+		void draw_shape(HDC hdc)const override
 		{
-			HWND hwnd = FindWindow(NULL, L"Inheritance - Microsoft Visual Studio");
-			HDC hdc = GetDC(hwnd);
-
-			HPEN hPen = CreatePen(PS_SOLID, line_width, color);
-			HBRUSH hBrush = CreateSolidBrush(color);
-
-			SelectObject(hdc, hPen);
-			SelectObject(hdc, hBrush);
-
 			POINT vertices[] =
 			{
 				{start_x, start_y + side},
@@ -436,11 +410,6 @@ namespace Geometry
 			};
 
 			::Polygon(hdc, vertices, 3);
-
-			DeleteObject(hBrush);
-			DeleteObject(hPen);
-
-			ReleaseDC(hwnd, hdc);
 		}
 		void info()const override
 		{
@@ -490,17 +459,8 @@ namespace Geometry
 		{
 			return base + side * 2;
 		}
-		void draw()const override
+		void draw_shape(HDC hdc)const override
 		{
-			HWND hwnd = FindWindow(NULL, L"Inheritance - Microsoft Visual Studio");
-			HDC hdc = GetDC(hwnd);
-
-			HPEN hPen = CreatePen(PS_SOLID, line_width, color);
-			HBRUSH hBrush = CreateSolidBrush(color);
-
-			SelectObject(hdc, hPen);
-			SelectObject(hdc, hBrush);
-
 			POINT vertices[] =
 			{
 				{start_x,start_y + side},
@@ -509,11 +469,6 @@ namespace Geometry
 			};
 
 			::Polygon(hdc, vertices, 3);
-
-			DeleteObject(hBrush);
-			DeleteObject(hPen);
-
-			ReleaseDC(hwnd, hdc);
 		}
 		void info()const override
 		{
@@ -565,17 +520,8 @@ namespace Geometry
 		{
 			return catheter_1 + catheter_2 + get_hypotenuse();
 		}
-		void draw()const override
+		void draw_shape(HDC hdc)const override
 		{
-			HWND hwnd = FindWindow(NULL, L"Inheritance - Microsoft Visual Studio");
-			HDC hdc = GetDC(hwnd);
-
-			HPEN hPen = CreatePen(PS_SOLID, line_width, color);
-			HBRUSH hBrush = CreateSolidBrush(color);
-
-			SelectObject(hdc, hPen);
-			SelectObject(hdc, hBrush);
-
 			POINT vertices[] =
 			{
 				{start_x, start_y},
@@ -584,11 +530,6 @@ namespace Geometry
 			};
 				
 			::Polygon(hdc, vertices, 3);
-
-			DeleteObject(hBrush);
-			DeleteObject(hPen);
-
-			ReleaseDC(hwnd, hdc);
 		}
 			void info()const override
 			{
